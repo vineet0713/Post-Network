@@ -1,0 +1,16 @@
+<!-- <textarea rows="6" [value]="newPost" #postInput></textarea>
+<hr>
+<button (click)="onAddPost(postInput)">Save Post</button>
+<p>{{ newPost }}</p> -->
+
+<mat-card>
+	<form [formGroup]="postForm" (ngSubmit)="onAddPost()">
+		<mat-form-field>
+			<input matInput class="form-control" id="title" placeholder="Post Title" [formControlName]="'title'">
+		</mat-form-field>
+		<mat-form-field>
+			<textarea matInput rows="6" class="form-control" id="content" placeholder="Post Content" [formControlName]="'content'"></textarea>
+		</mat-form-field>
+		<button type="submit" [disabled]="postForm.invalid" mat-raised-button color="accent">Save Post</button>
+	</form>
+</mat-card>

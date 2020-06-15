@@ -1,0 +1,8 @@
+:host {		/* The ':host' selector targets this entire element itself! */
+	display: block;
+	margin-top: 10px;
+}
+
+.info-text {
+	text-align: center;
+}
