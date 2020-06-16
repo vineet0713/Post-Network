@@ -16,8 +16,6 @@ export class PostCreateComponent implements OnInit {
 	// enteredContent = '';
 	postForm: FormGroup;
 
-	private postAddedSubscription: Subscription;
-
 	constructor(private postsService: PostsService) { }
 
 	ngOnInit() {
