@@ -1,1 +1,17 @@
-<mat-toolbar color="primary">My Messages</mat-toolbar>
+<!-- <mat-toolbar color="primary">My Messages</mat-toolbar> -->
+
+<mat-toolbar color="primary">
+	<span>
+		<a routerLink="/">Post Network</a>
+	</span>
+
+	<span class="spacer"></span>
+
+	<ul>
+		<li>
+			<!-- 'routerLink' makes sure that clicks are captured by the Angular Router,
+				so it can stop default behavior (sending HTTP request) and just re-render the page -->
+			<a mat-button routerLink="/create" routerLinkActive="mat-accent">New Post</a>
+		</li>
+	</ul>
+</mat-toolbar>

@@ -1,0 +1,14 @@
+a {
+	text-decoration: none;
+	color: white;
+}
+
+ul {
+	list-style: none;	/* removes the bullet point for each item in list */
+	padding: 0;
+	margin: 0;
+}
+
+.spacer {
+	flex: 1 1 auto;		/* makes sure that the 'spacer' element takes all the remaining space between other elements */
+}

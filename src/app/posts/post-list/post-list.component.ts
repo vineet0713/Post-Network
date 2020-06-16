@@ -12,15 +12,17 @@ import { Subscription } from 'rxjs';
 })
 export class PostListComponent implements OnInit, OnDestroy {
 	posts: Post[] = [];
+	isLoading = false;
 	private postsUpdatedSubscription: Subscription;
 
 	constructor(private postsService: PostsService) { }
 
 	ngOnInit() {
+		this.isLoading = true;
 		this.postsService.fetchPosts();
 		this.postsUpdatedSubscription = this.postsService.getPostsUpdatedListener().subscribe((fetchedPosts: Post[]) => {
-			console.log(fetchedPosts);
 			this.posts = fetchedPosts;
+			this.isLoading = false;
 		});
 	}
 
@@ -29,6 +31,4 @@ export class PostListComponent implements OnInit, OnDestroy {
 	onDeletePost(postIdToDelete: string) {
 		this.postsService.deletePost(postIdToDelete);
 	}
-
-	onEditPost(postIdToEdit: string) {}
 }
