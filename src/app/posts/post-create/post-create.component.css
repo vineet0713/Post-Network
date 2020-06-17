@@ -2,3 +2,21 @@ mat-form-field,
 textarea {
 	width: 100%;
 }
+
+/* Hides the input with type file (since we don't want to show that) */
+input[type="file"] {
+	visibility: hidden;
+}
+
+.image-preview {
+	height: 200px;
+	margin: 10px 0;
+}
+
+.image-preview img {
+	height: 100%;
+}
+
+.post-content {
+	margin-top: 20px;
+}

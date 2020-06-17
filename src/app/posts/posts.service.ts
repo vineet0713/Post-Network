@@ -19,8 +19,12 @@ export class PostsService {
 	getPostsUpdatedListener() { return this.postsUpdated.asObservable(); }
 
 	addPost(post: Post) {
+		const postData = new FormData();
+		postData.append('title', post.title);
+		postData.append('content', post.content);
+		postData.append('image', post.image, post.title);	// 'post.title' will be the filename of image
 		const endpoint = 'http://localhost:5000/api/post';
-		this.httpClient.post(endpoint, post).subscribe(result => this.router.navigate(['/']));
+		this.httpClient.post(endpoint, postData).subscribe(result => this.router.navigate(['/']));
 	}
 
 	fetchPosts() {
@@ -34,6 +38,7 @@ export class PostsService {
 						id: post._id,
 						title: post.title,
 						content: post.content,
+						imagePath: post.imagePath,
 					};
 				});
 			}))
@@ -54,8 +59,18 @@ export class PostsService {
 		this.httpClient.delete<responseType>(endpoint).subscribe(responseHandler);
 	}
 
-	updatePost(postIdToUpdate: string, postData: Post) {
+	updatePost(postIdToUpdate: string, post: Post) {
 		const endpoint = 'http://localhost:5000/api/post/' + postIdToUpdate;
+		let postData;
+		if (post.image) {
+			postData = new FormData();
+			postData.append('title', post.title);
+			postData.append('content', post.content);
+			postData.append('imagePath', post.imagePath);
+			postData.append('image', post.image, post.title);	// 'post.title' will be the filename of image
+		} else {
+			postData = post;
+		}
 		this.httpClient.put(endpoint, postData).subscribe(result => this.router.navigate(['/']));
 	}
 
