@@ -11,8 +11,8 @@ import { map } from 'rxjs/operators';
 	providedIn: 'root',
 })
 export class PostsService {
-	private posts: Post[] = [];
-	private postsUpdated = new Subject<Post[]>();
+	private API_URL = 'http://localhost:5000/api/';
+	private postsUpdated = new Subject<{ posts: Post[], totalPosts: number }>();
 
 	constructor(private httpClient: HttpClient, private router: Router) { }
 
@@ -23,44 +23,41 @@ export class PostsService {
 		postData.append('title', post.title);
 		postData.append('content', post.content);
 		postData.append('image', post.image, post.title);	// 'post.title' will be the filename of image
-		const endpoint = 'http://localhost:5000/api/post';
+		const endpoint = this.API_URL + 'post';
 		this.httpClient.post(endpoint, postData).subscribe(result => this.router.navigate(['/']));
 	}
 
-	fetchPosts() {
-		const endpoint = 'http://localhost:5000/api/posts';
-		type responseType = { message: string, posts: any };
+	fetchPosts(pageSize: number, page: number) {
+		const queryParams = `?pageSize=${pageSize}&page=${page}`;
+		const endpoint = this.API_URL + 'posts' + queryParams;
+		type responseType = { message: string, posts: any, totalPosts: number };
 		this.httpClient.get<responseType>(endpoint)
 			// Use 'pipe' because the data returned will not be in same format as Post interface we have on client!
-			.pipe(map(postData => {
-				return postData.posts.map(post => {
-					return {
-						id: post._id,
-						title: post.title,
-						content: post.content,
-						imagePath: post.imagePath,
-					};
-				});
+			.pipe(map(responseData => {
+				return {
+					totalPosts: +responseData.totalPosts,
+					posts: responseData.posts.map(post => {
+						return {
+							id: post._id,
+							title: post.title,
+							content: post.content,
+							imagePath: post.imagePath,
+						};
+					}),
+				};
 			}))
-			.subscribe(fetchedPosts => {
-				this.posts = fetchedPosts;
-				this.postsUpdated.next([...this.posts]);
+			.subscribe(postData => {
+				this.postsUpdated.next({...postData});
 			});
 	}
 
-	deletePost(postIdToDelete: string) {
-		const endpoint = 'http://localhost:5000/api/post/' + postIdToDelete;
-		type responseType = { message: string };
-		const responseHandler = response => {
-			const updatedPosts = this.posts.filter(post => post.id !== postIdToDelete);
-			this.posts = updatedPosts;
-			this.postsUpdated.next([...this.posts]);
-		};
-		this.httpClient.delete<responseType>(endpoint).subscribe(responseHandler);
+	deletePost(postIdToDelete: string, imagePath: string, imageType: string, pageSize: number, page: number) {
+		const endpoint = this.API_URL + 'post/' + postIdToDelete + '?imagePath=' + imagePath + '&imageType=' + imageType;
+		this.httpClient.delete(endpoint).subscribe(response => this.fetchPosts(pageSize, page));
 	}
 
 	updatePost(postIdToUpdate: string, post: Post) {
-		const endpoint = 'http://localhost:5000/api/post/' + postIdToUpdate;
+		const endpoint = this.API_URL + 'post/' + postIdToUpdate;
 		let postData;
 		if (post.image) {
 			postData = new FormData();
@@ -75,7 +72,7 @@ export class PostsService {
 	}
 
 	getPost(postIdToGet: string) {
-		const endpoint = 'http://localhost:5000/api/post/' + postIdToGet;
+		const endpoint = this.API_URL + 'post/' + postIdToGet;
 		type responseType = { message: string, post: any };
 		return this.httpClient.get<responseType>(endpoint);
 	}
