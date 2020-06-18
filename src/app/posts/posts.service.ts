@@ -57,13 +57,13 @@ export class PostsService {
 							title: post.title,
 							content: post.content,
 							imagePath: post.imagePath,
+							creatorUsername: post.creator.username,
+							creatorId: post.creator._id,
 						};
 					}),
 				};
 			}))
-			.subscribe(postData => {
-				this.postsUpdated.next({...postData});
-			});
+			.subscribe(postData => this.postsUpdated.next({...postData}));
 	}
 
 	deletePost(postIdToDelete: string, imagePath: string, imageType: string, pageSize: number, page: number) {
@@ -71,8 +71,13 @@ export class PostsService {
 		const successResponse = response => this.fetchPosts(pageSize, page);
 		const errorResponse = error => {
 			if (error.status === 401) {
-				alert('Your auth token expired. Please login again.');
-				this.router.navigate(['/login']);
+				if (error.error.message === 'Not authorized to delete this post!') {
+					alert('You did not create this post, so you cannot delete it.');
+					this.router.navigate(['/create']);
+				} else {
+					alert('Your auth token expired. Please login again.');
+					this.router.navigate(['/login']);
+				}
 			} else {
 				alert('An error occurred. Please try again.');
 			}
@@ -100,8 +105,13 @@ export class PostsService {
 		const successResponse = result => this.router.navigate(['/']);
 		const errorResponse = error => {
 			if (error.status === 401) {
-				alert('Your auth token expired. Please login again.');
-				this.router.navigate(['/login']);
+				if (error.error.message === 'Not authorized to update this post!') {
+					alert('You did not create this post, so you cannot modify it.');
+					this.router.navigate(['/']);
+				} else {
+					alert('Your auth token expired. Please login again.');
+					this.router.navigate(['/login']);
+				}
 			} else {
 				alert('An error occurred. Please try again.');
 			}

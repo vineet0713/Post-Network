@@ -24,3 +24,11 @@ mat-spinner {
 mat-paginator {
 	margin-top: 20px;
 }
+
+.spacer {
+	flex: 1 1 auto;		/* makes sure that the 'spacer' element takes all the remaining space between other elements */
+}
+
+.creator {
+	margin-right: 20px;
+}

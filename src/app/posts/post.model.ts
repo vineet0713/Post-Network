@@ -8,4 +8,6 @@ export interface Post {
 	content: string;
 	image?: File;
 	imagePath?: string;
+	creatorUsername?: string;
+	creatorId?: string;
 }

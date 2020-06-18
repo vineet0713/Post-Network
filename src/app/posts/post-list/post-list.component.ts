@@ -46,9 +46,13 @@ export class PostListComponent implements OnInit, OnDestroy {
 		this.postsUpdatedSubscription.unsubscribe();
 	}
 
-	onDeletePost(postIdToDelete: string, imagePathToDelete: string) {
+	onDeletePost(postIdToDelete: string, imagePathToDelete: string, creatorUserId: string) {
 		if (!this.authService.isAuthenticated()) {
 			alert('Please login to delete posts if they are your own.');
+			return;
+		}
+		if (this.authService.getUserId() !== creatorUserId) {
+			alert('You did not create this post, so you cannot delete it.');
 			return;
 		}
 		const imageFilename = imagePathToDelete.split('/').pop();

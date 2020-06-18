@@ -24,10 +24,12 @@ const routes: Routes = [
 	{
 		path: 'login',
 		component: LoginComponent,
+		canActivate: [AuthGuard],		// user must not be authenticated to access this route!
 	},
 	{
 		path: 'signup',
 		component: LoginComponent,
+		canActivate: [AuthGuard],		// user must not be authenticated to access this route!
 	},
 ];
 
