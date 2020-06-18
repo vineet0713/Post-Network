@@ -8,10 +8,19 @@
 	<span class="spacer"></span>
 
 	<ul>
-		<li>
+		<li *ngIf="!this.authService.isAuthenticated()">
+			<a mat-button routerLink="/signup" routerLinkActive="mat-accent">Signup</a>
+		</li>
+		<li *ngIf="!this.authService.isAuthenticated()">
+			<a mat-button routerLink="/login" routerLinkActive="mat-accent">Login</a>
+		</li>
+		<li *ngIf="this.authService.isAuthenticated()">
 			<!-- 'routerLink' makes sure that clicks are captured by the Angular Router,
 				so it can stop default behavior (sending HTTP request) and just re-render the page -->
 			<a mat-button routerLink="/create" routerLinkActive="mat-accent">New Post</a>
+		</li>
+		<li *ngIf="this.authService.isAuthenticated()">
+			<button mat-button (click)="onLogout()">Logout</button>
 		</li>
 	</ul>
 </mat-toolbar>

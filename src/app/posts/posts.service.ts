@@ -3,6 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
 
 import { Post } from './post.model';
+import { AuthService } from './../auth/auth.service';
 
 import { Subject } from 'rxjs';
 import { map } from 'rxjs/operators';
@@ -14,17 +15,31 @@ export class PostsService {
 	private API_URL = 'http://localhost:5000/api/';
 	private postsUpdated = new Subject<{ posts: Post[], totalPosts: number }>();
 
-	constructor(private httpClient: HttpClient, private router: Router) { }
+	constructor(private httpClient: HttpClient, private router: Router, private authService: AuthService) { }
 
 	getPostsUpdatedListener() { return this.postsUpdated.asObservable(); }
 
 	addPost(post: Post) {
+		if (!this.authService.isAuthenticated()) {
+			alert('Your auth token expired. Please login again.');
+			this.router.navigate(['/login']);
+			return;
+		}
 		const postData = new FormData();
 		postData.append('title', post.title);
 		postData.append('content', post.content);
 		postData.append('image', post.image, post.title);	// 'post.title' will be the filename of image
 		const endpoint = this.API_URL + 'post';
-		this.httpClient.post(endpoint, postData).subscribe(result => this.router.navigate(['/']));
+		const successResponse = result => this.router.navigate(['/']);
+		const errorResponse = error => {
+			if (error.status === 401) {
+				alert('Your auth token expired. Please login again.');
+				this.router.navigate(['/login']);
+			} else {
+				alert('An error occurred. Please try again.');
+			}
+		};
+		this.httpClient.post(endpoint, postData).subscribe(successResponse, errorResponse);
 	}
 
 	fetchPosts(pageSize: number, page: number) {
@@ -53,10 +68,24 @@ export class PostsService {
 
 	deletePost(postIdToDelete: string, imagePath: string, imageType: string, pageSize: number, page: number) {
 		const endpoint = this.API_URL + 'post/' + postIdToDelete + '?imagePath=' + imagePath + '&imageType=' + imageType;
-		this.httpClient.delete(endpoint).subscribe(response => this.fetchPosts(pageSize, page));
+		const successResponse = response => this.fetchPosts(pageSize, page);
+		const errorResponse = error => {
+			if (error.status === 401) {
+				alert('Your auth token expired. Please login again.');
+				this.router.navigate(['/login']);
+			} else {
+				alert('An error occurred. Please try again.');
+			}
+		};
+		this.httpClient.delete(endpoint).subscribe(successResponse, errorResponse);
 	}
 
 	updatePost(postIdToUpdate: string, post: Post) {
+		if (!this.authService.isAuthenticated()) {
+			alert('Your auth token expired. Please login again.');
+			this.router.navigate(['/login']);
+			return;
+		}
 		const endpoint = this.API_URL + 'post/' + postIdToUpdate;
 		let postData;
 		if (post.image) {
@@ -68,7 +97,16 @@ export class PostsService {
 		} else {
 			postData = post;
 		}
-		this.httpClient.put(endpoint, postData).subscribe(result => this.router.navigate(['/']));
+		const successResponse = result => this.router.navigate(['/']);
+		const errorResponse = error => {
+			if (error.status === 401) {
+				alert('Your auth token expired. Please login again.');
+				this.router.navigate(['/login']);
+			} else {
+				alert('An error occurred. Please try again.');
+			}
+		};
+		this.httpClient.put(endpoint, postData).subscribe(successResponse, errorResponse);
 	}
 
 	getPost(postIdToGet: string) {

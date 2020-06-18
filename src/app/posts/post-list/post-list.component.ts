@@ -1,7 +1,8 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
-import { PageEvent } from '@angular/material';
+import { Component, OnInit, OnDestroy, ViewChild } from '@angular/core';
+import { PageEvent, MatPaginator } from '@angular/material';
 
 import { PostsService } from './../posts.service';
+import { AuthService } from './../../auth/auth.service';
 import { Post } from './../post.model';
 
 import { Subscription } from 'rxjs';
@@ -12,6 +13,8 @@ import { Subscription } from 'rxjs';
 	styleUrls: ['./post-list.component.css'],
 })
 export class PostListComponent implements OnInit, OnDestroy {
+	@ViewChild('paginator', { static: false }) paginator: MatPaginator;
+
 	posts: Post[] = [];
 	isLoading = false;
 
@@ -22,7 +25,7 @@ export class PostListComponent implements OnInit, OnDestroy {
 
 	private postsUpdatedSubscription: Subscription;
 
-	constructor(private postsService: PostsService) { }
+	constructor(private postsService: PostsService, private authService: AuthService) { }
 
 	ngOnInit() {
 		this.loadPosts();
@@ -39,12 +42,23 @@ export class PostListComponent implements OnInit, OnDestroy {
 		});
 	}
 
-	ngOnDestroy() { this.postsUpdatedSubscription.unsubscribe(); }
+	ngOnDestroy() {
+		this.postsUpdatedSubscription.unsubscribe();
+	}
 
 	onDeletePost(postIdToDelete: string, imagePathToDelete: string) {
+		if (!this.authService.isAuthenticated()) {
+			alert('Please login to delete posts if they are your own.');
+			return;
+		}
 		const imageFilename = imagePathToDelete.split('/').pop();
 		const filenameArray = imageFilename.split('.');	// first element is filename, second element is file extension
 		this.isLoading = true;
+		if (this.posts.length === 1 && this.currentPage > 1) {
+			// If to-be-deleted post is the only one on the page, then decrement the current page (so the previous page would be viewed)
+			this.currentPage--;
+			this.paginator.previousPage();
+		}
 		this.postsService.deletePost(postIdToDelete, filenameArray[0], filenameArray[1], this.postsPerPage, this.currentPage);
 	}
 

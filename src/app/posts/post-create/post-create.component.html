@@ -6,18 +6,19 @@
 <mat-card>
 	<form [formGroup]="postForm" (ngSubmit)="onAddPost()">
 		<mat-form-field>
-			<input matInput class="form-control" id="title" placeholder="Post Title" [formControlName]="'title'">
+			<input matInput placeholder="Post Title" [formControlName]="'title'">
 			<mat-error *ngIf="postForm.get('title').invalid">Please enter a post title.</mat-error>
 		</mat-form-field>
 		<div>
 			<button mat-stroked-button type="button" (click)="filePicker.click()">Pick Image</button>
 			<input type="file" (change)="onImagePicked($event)" #filePicker>
+			<mat-error *ngIf="postForm.get('image').invalid">Please choose an image.</mat-error>
 		</div>
 		<div class="image-preview" *ngIf="imagePreview">
 			<img [src]="imagePreview" [alt]="postForm.value.title">
 		</div>
 		<mat-form-field class="post-content">
-			<textarea matInput rows="6" class="form-control" id="content" placeholder="Post Content" [formControlName]="'content'"></textarea>
+			<textarea matInput rows="6" placeholder="Post Content" [formControlName]="'content'"></textarea>
 			<mat-error *ngIf="postForm.get('content').invalid">Please enter post content.</mat-error>
 		</mat-form-field>
 		<button type="submit" [disabled]="postForm.invalid" mat-raised-button color="accent">Save Post</button>

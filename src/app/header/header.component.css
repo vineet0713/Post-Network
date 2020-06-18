@@ -4,6 +4,7 @@ a {
 }
 
 ul {
+	display: flex;		/* makes list display horizontal instead of vertical */
 	list-style: none;	/* removes the bullet point for each item in list */
 	padding: 0;
 	margin: 0;

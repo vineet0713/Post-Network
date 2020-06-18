@@ -1,6 +1,7 @@
 mat-form-field,
 textarea {
 	width: 100%;
+	margin-bottom: 20px;
 }
 
 /* Hides the input with type file (since we don't want to show that) */
