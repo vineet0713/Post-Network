@@ -1,3 +1,5 @@
+import { environment } from '../../environments/environment';
+
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
@@ -11,7 +13,6 @@ import { Subject } from 'rxjs';
 })
 export class AuthService {
 	private token: string = null;
-	private API_URL = 'http://localhost:5000/api/';
 	private userId: string = null;
 
 	constructor(private httpClient: HttpClient, private router: Router) { }
@@ -39,7 +40,7 @@ export class AuthService {
 			username: username,
 			password: password,
 		};
-		const endpoint = this.API_URL + 'signup';
+		const endpoint = environment.API_URL + 'signup';
 		const successResponse = response => this.router.navigate(['/login']);
 		const errorResponse = error => alert('This username already exists! Please try another one.');
 		this.httpClient.post(endpoint, authData).subscribe(successResponse, errorResponse);
@@ -50,7 +51,7 @@ export class AuthService {
 			username: username,
 			password: password,
 		};
-		const endpoint = this.API_URL + 'login';
+		const endpoint = environment.API_URL + 'login';
 		type responseType = { token: string, expiresIn: number, userId: string };
 		const successResponse = response => {
 			this.token = response.token;
