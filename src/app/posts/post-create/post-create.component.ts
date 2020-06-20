@@ -16,6 +16,7 @@ export class PostCreateComponent implements OnInit {
 	postForm: FormGroup;
 	editingPost: Post;
 	imagePreview: string;
+	isLoading = false;
 
 	constructor(private postsService: PostsService, private route: ActivatedRoute) { }
 
@@ -28,6 +29,7 @@ export class PostCreateComponent implements OnInit {
 		});
 		this.route.paramMap.subscribe((paramMap: ParamMap) => {
 			// This is called whenever the parameters change in the route URL (so we know what post is being edited, if any)
+			this.isLoading = false;
 			if (paramMap.has('postId')) {
 				const responseHandler = postData => {
 					this.editingPost = {
@@ -51,6 +53,7 @@ export class PostCreateComponent implements OnInit {
 	}
 
 	onAddPost() {
+		this.isLoading = true;
 		let newPost: Post = {
 			title: this.postForm.value['title'],
 			content: this.postForm.value['content'],
@@ -58,17 +61,30 @@ export class PostCreateComponent implements OnInit {
 
 		if (!this.editingPost) {
 			newPost.image = this.postForm.value['image'];
-			this.postsService.addPost(newPost);
-		} else {
-			if (typeof(this.postForm.value['image']) === 'string') {
-				newPost.imagePath = this.postForm.value['image'];
-			} else {
-				newPost.image = this.postForm.value['image'];
-				newPost.imagePath = this.editingPost.imagePath;
-			}
-			this.postsService.updatePost(this.editingPost.id, newPost);
+			this.postsService.uploadImageFile(this.postForm.value['image'], newPost.title)
+				.then((uploadResult: { imagePath: string }) => {
+					newPost.imagePath = uploadResult.imagePath;
+					this.postsService.addPost(newPost);
+				})
+				.catch(error => alert('The image was not able to be uploaded.'));
+			return;
 		}
-		this.postForm.reset();
+
+		if (typeof(this.postForm.value['image']) === 'string') {
+			newPost.imagePath = this.postForm.value['image'];
+			this.postsService.updatePost(this.editingPost.id, newPost);
+			return;
+		}
+		
+		this.postsService.removeImageFile(this.editingPost.imagePath)
+			.then(result => {
+				return this.postsService.uploadImageFile(this.postForm.value['image'], newPost.title);
+			})
+			.then((uploadResult: { imagePath: string }) => {
+				newPost.imagePath = uploadResult.imagePath;
+				this.postsService.updatePost(this.editingPost.id, newPost);
+			})
+			.catch(error => alert('The post was not able to be updated.'));
 	}
 
 	onImagePicked(event: Event) {

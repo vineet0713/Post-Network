@@ -24,3 +24,5 @@
 		<button type="submit" [disabled]="postForm.invalid" mat-raised-button color="accent">Save Post</button>
 	</form>
 </mat-card>
+
+<mat-spinner *ngIf="isLoading"></mat-spinner>

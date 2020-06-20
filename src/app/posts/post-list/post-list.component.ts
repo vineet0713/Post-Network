@@ -1,5 +1,6 @@
 import { Component, OnInit, OnDestroy, ViewChild } from '@angular/core';
 import { PageEvent, MatPaginator } from '@angular/material';
+import { Router } from '@angular/router';
 
 import { PostsService } from './../posts.service';
 import { AuthService } from './../../auth/auth.service';
@@ -25,7 +26,7 @@ export class PostListComponent implements OnInit, OnDestroy {
 
 	private postsUpdatedSubscription: Subscription;
 
-	constructor(private postsService: PostsService, private authService: AuthService) { }
+	constructor(private postsService: PostsService, private authService: AuthService, private router: Router) { }
 
 	ngOnInit() {
 		this.loadPosts();
@@ -46,6 +47,14 @@ export class PostListComponent implements OnInit, OnDestroy {
 		this.postsUpdatedSubscription.unsubscribe();
 	}
 
+	onEditPost(postIdToUpdate: string, creatorUserId: string) {
+		if (this.authService.getUserId() !== creatorUserId) {
+			alert('You did not create this post, so you cannot edit it.');
+			return;
+		}
+		this.router.navigate(['/edit/', postIdToUpdate]);
+	}
+
 	onDeletePost(postIdToDelete: string, imagePathToDelete: string, creatorUserId: string) {
 		if (!this.authService.isAuthenticated()) {
 			alert('Please login to delete posts if they are your own.');
@@ -55,15 +64,15 @@ export class PostListComponent implements OnInit, OnDestroy {
 			alert('You did not create this post, so you cannot delete it.');
 			return;
 		}
-		const imageFilename = imagePathToDelete.split('/').pop();
-		const filenameArray = imageFilename.split('.');	// first element is filename, second element is file extension
 		this.isLoading = true;
 		if (this.posts.length === 1 && this.currentPage > 1) {
 			// If to-be-deleted post is the only one on the page, then decrement the current page (so the previous page would be viewed)
 			this.currentPage--;
 			this.paginator.previousPage();
 		}
-		this.postsService.deletePost(postIdToDelete, filenameArray[0], filenameArray[1], this.postsPerPage, this.currentPage);
+		this.postsService.removeImageFile(imagePathToDelete)
+			.then(result => this.postsService.deletePost(postIdToDelete, this.postsPerPage, this.currentPage))
+			.catch(error => alert('The image file was not able to be deleted!'));
 	}
 
 	onChangedPage(pageData: PageEvent) {

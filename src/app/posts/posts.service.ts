@@ -20,16 +20,30 @@ export class PostsService {
 
 	getPostsUpdatedListener() { return this.postsUpdated.asObservable(); }
 
-	addPost(post: Post) {
+	uploadImageFile(imageFile: File, title: string) {
 		if (!this.authService.isAuthenticated()) {
 			alert('Your auth token expired. Please login again.');
 			this.router.navigate(['/login']);
 			return;
 		}
-		const postData = new FormData();
-		postData.append('title', post.title);
-		postData.append('content', post.content);
-		postData.append('image', post.image, post.title);	// 'post.title' will be the filename of image
+		const imageData = new FormData();
+		imageData.append('file', imageFile, title);	// 'post.title' will be the filename of image
+		const endpoint = environment.API_URL + 'uploadimage';
+		return this.httpClient.post(endpoint, imageData).toPromise();
+	}
+
+	removeImageFile(imagePath: string) {
+		const payload = { imagePath: imagePath }
+		const endpoint = environment.API_URL + 'deleteimage';
+		return this.httpClient.post(endpoint, payload).toPromise();
+	}
+
+	addPost(post: Post) {
+		const postData = {
+			title: post.title,
+			content: post.content,
+			imagePath: post.imagePath,
+		};
 		const endpoint = environment.API_URL + 'post';
 		const successResponse = result => this.router.navigate(['/']);
 		const errorResponse = error => {
@@ -67,8 +81,8 @@ export class PostsService {
 			.subscribe(postData => this.postsUpdated.next({...postData}));
 	}
 
-	deletePost(postIdToDelete: string, imagePath: string, imageType: string, pageSize: number, page: number) {
-		const endpoint = environment.API_URL + 'post/' + postIdToDelete + '?imagePath=' + imagePath + '&imageType=' + imageType;
+	deletePost(postIdToDelete: string, pageSize: number, page: number) {
+		const endpoint = environment.API_URL + 'post/' + postIdToDelete;
 		const successResponse = response => this.fetchPosts(pageSize, page);
 		const errorResponse = error => {
 			if (error.status === 401) {
@@ -86,23 +100,13 @@ export class PostsService {
 		this.httpClient.delete(endpoint).subscribe(successResponse, errorResponse);
 	}
 
-	updatePost(postIdToUpdate: string, post: Post) {
+	updatePost(postIdToUpdate: string, postData: Post) {
 		if (!this.authService.isAuthenticated()) {
 			alert('Your auth token expired. Please login again.');
 			this.router.navigate(['/login']);
 			return;
 		}
 		const endpoint = environment.API_URL + 'post/' + postIdToUpdate;
-		let postData;
-		if (post.image) {
-			postData = new FormData();
-			postData.append('title', post.title);
-			postData.append('content', post.content);
-			postData.append('imagePath', post.imagePath);
-			postData.append('image', post.image, post.title);	// 'post.title' will be the filename of image
-		} else {
-			postData = post;
-		}
 		const successResponse = result => this.router.navigate(['/']);
 		const errorResponse = error => {
 			if (error.status === 401) {
