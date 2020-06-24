@@ -47,23 +47,15 @@ export class PostListComponent implements OnInit, OnDestroy {
 		this.postsUpdatedSubscription.unsubscribe();
 	}
 
-	onEditPost(postIdToUpdate: string, creatorUserId: string) {
-		if (this.authService.getUserId() !== creatorUserId) {
-			alert('You did not create this post, so you cannot edit it.');
-			return;
-		}
+	canEditOrDelete(creatorUserId: string) {
+		return (this.authService.isAuthenticated()) && (this.authService.getUserId() === creatorUserId);
+	}
+
+	onEditPost(postIdToUpdate: string) {
 		this.router.navigate(['/edit/', postIdToUpdate]);
 	}
 
-	onDeletePost(postIdToDelete: string, imagePathToDelete: string, creatorUserId: string) {
-		if (!this.authService.isAuthenticated()) {
-			alert('Please login to delete posts if they are your own.');
-			return;
-		}
-		if (this.authService.getUserId() !== creatorUserId) {
-			alert('You did not create this post, so you cannot delete it.');
-			return;
-		}
+	onDeletePost(postIdToDelete: string, imagePathToDelete: string) {
 		this.isLoading = true;
 		if (this.posts.length === 1 && this.currentPage > 1) {
 			// If to-be-deleted post is the only one on the page, then decrement the current page (so the previous page would be viewed)
